@@ -16,6 +16,10 @@ public class Player : MonoBehaviour
     private CharacterController controller;
     [SerializeField]
     private float gravity;
+    [SerializeField]
+    private int experiencePerObject;
+    private int level;
+    private int experienceRequired;
     // Start is called before the first frame update
     void Start()
     {
@@ -36,5 +40,35 @@ public class Player : MonoBehaviour
 
         movement.y = gravity;
         controller.Move(speed * Time.deltaTime * movement);
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Experience")){
+            experience += experiencePerObject;
+            if (experience >= experienceRequired)
+            {
+                LevelUp();
+            }
+        }
+    }
+
+    private void LevelUp()
+    {
+        experience -= experienceRequired;
+        level++;
+        experienceRequired = experiencePerObject * 10 * level;
+        if (experience >= experienceRequired)
+        {
+            LevelUp();
+        }
+    }
+    public void TakeDamage(int damage)
+    {
+        health -= damage;
+        if (health <= 0)
+        {
+            health = 0;
+            //gameover logic goes here
+        }
     }
 }
