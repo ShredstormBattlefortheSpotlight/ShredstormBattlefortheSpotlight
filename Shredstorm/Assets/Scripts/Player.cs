@@ -9,7 +9,7 @@ public class Player : MonoBehaviour
     [SerializeField]
     private int damage;
     [SerializeField]
-    private int experience
+    private int experience;
     // Start is called before the first frame update
     void Start()
     {
@@ -19,6 +19,6 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if ()
+
     }
 }
