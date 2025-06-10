@@ -4,9 +4,16 @@ using UnityEngine;
 
 public class Camera : MonoBehaviour
 {
+    [SerializeField]
+    private float xOffset;
+    [SerializeField]
+    private float yOffset;
+    [SerializeField]
+    private float zOffset;
     private Quaternion camRotation;
     [SerializeField]
     private Transform target;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -15,6 +22,6 @@ public class Camera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = new Vector3(target.transform.position.x, target.transform.position.y + 6, target.transform.position.z - 8);
+        transform.position = new Vector3(target.transform.position.x, target.transform.position.y + yOffset, target.transform.position.z - zOffset);
     }
 }

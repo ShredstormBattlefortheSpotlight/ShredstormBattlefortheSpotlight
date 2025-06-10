@@ -14,10 +14,11 @@ public class Player : MonoBehaviour
     private float speed;
     [SerializeField]
     private CharacterController controller;
+    [SerializeField]
+    private float gravity;
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("Current forward: " + transform.forward);
     }
 
     // Update is called once per frame
@@ -32,6 +33,8 @@ public class Player : MonoBehaviour
             transform.rotation = Quaternion.Euler(-90, transform.eulerAngles.y, transform.eulerAngles.z);
 
         }
+
+        movement.y = gravity;
         controller.Move(speed * Time.deltaTime * movement);
     }
 }
