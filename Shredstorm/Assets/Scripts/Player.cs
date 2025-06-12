@@ -5,7 +5,9 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField]
-    private float health;
+    private float maximumHealth;
+    [SerializeField]
+    private float currentHealth;
     [SerializeField]
     private float damage;
     [SerializeField]
@@ -18,11 +20,16 @@ public class Player : MonoBehaviour
     private float gravity;
     [SerializeField]
     private int experiencePerObject;
-    private int level;
-    private int experienceRequired;
+    [SerializeField]
+    private GameObject levelUpUI;
+    [SerializeField]
+    private int level = 1;
+    [SerializeField]
+    private int experienceRequired = 100;
     // Start is called before the first frame update
     void Start()
     {
+        currentHealth = maximumHealth;
     }
 
     // Update is called once per frame
@@ -41,14 +48,21 @@ public class Player : MonoBehaviour
         movement.y = gravity;
         controller.Move(speed * Time.deltaTime * movement);
     }
-    private void OnCollisionEnter(Collision collision)
+
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.gameObject.CompareTag("Experience")){
+        if (other.gameObject.CompareTag("Experience"))
+        {
             experience += experiencePerObject;
-            if (experience >= experienceRequired)
-            {
-                LevelUp();
-            }
+            CheckLevelUp();
+        }
+    }
+
+    public void CheckLevelUp()
+    {
+        if (experience >= experienceRequired)
+        {
+            LevelUp();
         }
     }
 
@@ -56,18 +70,32 @@ public class Player : MonoBehaviour
     {
         experience -= experienceRequired;
         level++;
-        experienceRequired = experiencePerObject * 10 * level;
-        if (experience >= experienceRequired)
-        {
-            LevelUp();
-        }
+        experienceRequired += level * 100;
+        levelUpUI.SetActive(true);
+        Time.timeScale = 0;
     }
-    public void TakeDamage(int damage)
+
+    public void UpgradeHealth(float upgrade)
     {
-        health -= damage;
-        if (health <= 0)
+        maximumHealth += upgrade;
+        currentHealth += upgrade;
+    }
+
+    public void UpgradeSpeed(float upgrade)
+    {
+        speed += upgrade;
+    }
+
+    public void UpgradeDamage(float upgrade)
+    {
+        damage += upgrade;
+    }
+    public void TakeDamage(float damage)
+    {
+        currentHealth -= damage;
+        if (currentHealth <= 0)
         {
-            health = 0;
+            currentHealth = 0;
             //gameover logic goes here
         }
     }
