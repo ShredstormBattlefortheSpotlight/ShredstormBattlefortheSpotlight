@@ -73,11 +73,11 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Experience"))
+        /*if (other.gameObject.CompareTag("Experience"))
         {
             experience += experiencePerObject;
             CheckLevelUp();
-        }
+        }*/
         if (other.gameObject.CompareTag("Drummer"))
         {
             Debug.Log("Contact with drummer");
@@ -89,6 +89,12 @@ public class Player : MonoBehaviour
             singerAbility.SetActive(true);
             Destroy(other.gameObject);
         }
+    }
+
+    public void AddExperience(int amount)
+    {
+        experience += amount;
+        CheckLevelUp();
     }
 
     public void CheckLevelUp()
