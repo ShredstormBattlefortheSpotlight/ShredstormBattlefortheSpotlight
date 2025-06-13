@@ -1,86 +1,121 @@
 using System.Collections;
 using UnityEngine;
 
+/*
+ * EnemyHealth.cs
+ *  – handles all damage, hit feedback, knockback, death VFX/SFX
+ *  – player’s AttackArea will call TakeDamage()
+ *  – uses rigidbody impulse for knockback, then resets to kinematic
+ */
 public class EnemyHealth : MonoBehaviour, IDamageable
 {
     private int currentHealth;
     private EnemyStats stats;
 
-    private Renderer enemyRenderer;
-    private Color originalColor;
-    private Coroutine flashCoroutine;
+    private Renderer rend;
+    private Color origColor;
+    private Coroutine flashRoutine;
 
     private Rigidbody rb;
 
-    // start with max health
     void Start()
     {
         stats = GetComponent<EnemyStats>();
         currentHealth = stats.maxHealth;
 
+        // get or add rigidbody for knockback only
         rb = GetComponent<Rigidbody>();
+        if (rb == null) rb = gameObject.AddComponent<Rigidbody>();
+        rb.useGravity = false;             // no falling
+        rb.isKinematic = true;             // movement by script, not physics
+        rb.constraints = RigidbodyConstraints.FreezeRotation;
 
-        // cache visual data
-        enemyRenderer = GetComponentInChildren<Renderer>();
-        if (enemyRenderer != null)
+        // cache renderer for hit-flash
+        rend = GetComponentInChildren<Renderer>();
+        if (rend != null)
         {
-            originalColor = enemyRenderer.material.color;
+            // make a unique material instance so we can tint it
+            rend.material = new Material(rend.material);
+            origColor = rend.material.color;
         }
     }
 
-    // take damage from attacks
-    public void TakeDamage(int amount, Vector3 knockbackDir, float knockbackForce)
+    // called by player AttackArea.OnTriggerEnter(...)
+    public void TakeDamage(int amount, Vector3 knockDir, float knockForce)
     {
         currentHealth -= amount;
 
-        // apply knockback using rigidbody force
-        if (knockbackForce > 0f && rb != null)
+        // play hit VFX/SFX
+        if (stats.hitEffect) Instantiate(stats.hitEffect, transform.position, Quaternion.identity);
+        if (stats.hitSound) AudioSource.PlayClipAtPoint(stats.hitSound, transform.position);
+
+        // trigger hit animation if set
+        if (stats.animator) stats.animator.SetTrigger(stats.hitTrigger);
+
+        // apply physics knockback
+        if (knockForce > 0f && rb != null)
         {
-            float adjustedForce = knockbackForce * (1f - stats.knockbackResistance);
-            rb.AddForce(knockbackDir * adjustedForce, ForceMode.Impulse);
+            float force = knockForce * (1f - stats.knockbackResistance);
+            rb.isKinematic = false;
+            rb.AddForce(knockDir * force, ForceMode.Impulse);
+            StartCoroutine(ResetKinematic());
         }
 
-        // flash + shake
-        if (enemyRenderer != null)
+        // flash gray
+        if (rend != null)
         {
-            if (flashCoroutine != null)
-                StopCoroutine(flashCoroutine);
-
-            flashCoroutine = StartCoroutine(DamageFlash());
+            if (flashRoutine != null) StopCoroutine(flashRoutine);
+            flashRoutine = StartCoroutine(FlashHit());
         }
 
+        // die if out of HP
         if (currentHealth <= 0)
-        {
             Die();
-        }
     }
 
-    // grayed out and shake when hit
-    private IEnumerator DamageFlash()
+    // re-enable kinematic so movement code works again
+    private IEnumerator ResetKinematic()
     {
-        enemyRenderer.material.color = Color.gray;
-
-        Vector3 originalPos = transform.position;
-        Vector3 shakeOffset = new Vector3(0.05f, 0, 0.05f);
-        transform.position = originalPos + shakeOffset;
-
         yield return new WaitForSeconds(0.1f);
-
-        enemyRenderer.material.color = originalColor;
-        transform.position = originalPos;
+        rb.velocity = Vector3.zero;
+        rb.isKinematic = true;
     }
 
-    // destroy enemy on death
+    // quick gray flash
+    private IEnumerator FlashHit()
+    {
+        rend.material.color = Color.gray;
+        yield return new WaitForSeconds(0.1f);
+        rend.material.color = origColor;
+    }
+
     private void Die()
     {
-        // if (stats.deathEffect != null)
-        //     Instantiate(stats.deathEffect, transform.position, Quaternion.identity);
+        // play death VFX/SFX
+        if (stats.deathEffect) Instantiate(stats.deathEffect, transform.position, Quaternion.identity);
+        if (stats.deathSound) AudioSource.PlayClipAtPoint(stats.deathSound, transform.position);
 
-        // if (stats.deathSound != null)
-        //     AudioSource.PlayClipAtPoint(stats.deathSound, transform.position);
+        // trigger death anim if available
+        if (stats.animator) stats.animator.SetTrigger(stats.deathTrigger);
 
-        // later: xp drop here
+        // spawn XP pickup
+        if (stats.xpPickupPrefab != null)
+        {
+            var xpObj = Instantiate(
+                stats.xpPickupPrefab,
+                transform.position,
+                Quaternion.identity
+            );
+            // set the amount on the pickup
+            var xp = xpObj.GetComponent<XP_Pickup>();
+            if (xp != null) xp.amount = stats.xpDrop;
+        }
 
-        Destroy(gameObject);
+        var spawner = FindObjectOfType<EnemySpawner>();
+        if (spawner != null)
+            spawner.ReturnToPool(gameObject);
+        else
+            Destroy(gameObject);
+        
     }
 }

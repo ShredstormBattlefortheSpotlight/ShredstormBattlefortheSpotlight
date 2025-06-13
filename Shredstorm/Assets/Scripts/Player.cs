@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IDamageable
 {
     [SerializeField]
     private float maximumHealth;
@@ -49,15 +49,22 @@ public class Player : MonoBehaviour
         controller.Move(speed * Time.deltaTime * movement);
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.CompareTag("Experience"))
-        {
-            experience += experiencePerObject;
-            CheckLevelUp();
-        }
-    }
+    // private void OnTriggerEnter(Collider other)
+    // {
+    //     if (other.gameObject.CompareTag("Experience"))
+    //     {
+    //         experience += experiencePerObject;
+    //         CheckLevelUp();
+    //     }
+    // }
 
+    public void AddExperience(int xp)
+    {
+        experience += xp;
+        DebugManager.Log($"player gained {xp} xp (total {experience})");
+        CheckLevelUp();
+    }
+    
     public void CheckLevelUp()
     {
         if (experience >= experienceRequired)
@@ -90,13 +97,16 @@ public class Player : MonoBehaviour
     {
         damage += upgrade;
     }
-    public void TakeDamage(float damage)
+    public void TakeDamage(int amount, Vector3 knockbackDir, float knockbackForce)
     {
-        currentHealth -= damage;
+        currentHealth -= amount;
+        
+        controller.Move(knockbackDir * knockbackForce);
+        
         if (currentHealth <= 0)
         {
             currentHealth = 0;
-            //gameover logic goes here
+            // TODO: game over logic
         }
     }
 }

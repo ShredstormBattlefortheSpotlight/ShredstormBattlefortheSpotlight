@@ -1,59 +1,77 @@
 using UnityEngine;
 
+/*
+ * EnemyMovement.cs
+ *  – uses Rigidbody.velocity so gravity & collisions keep them grounded
+ *  – chases player based on EnemyStats (agroRange / alwaysAlert)
+ *  – stops at stopDistance (melee) or attackRange (ranged) so no overlap
+ *  – locks X/Z rotation so they stay upright
+ */
+
 public class EnemyMovement : MonoBehaviour
 {
-    private Transform player;
     private EnemyStats stats;
+    private Transform player;
 
     void Start()
     {
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null)
-        {
-            player = playerObj.transform;
-        }
+        // find stats on this object or its children
+        stats = GetComponent<EnemyStats>() 
+             ?? GetComponentInChildren<EnemyStats>();
 
-        stats = GetComponent<EnemyStats>();
+        if (stats == null)
+            Debug.LogError("EnemyMovement: no EnemyStats found!");
+
+        var p = GameObject.FindGameObjectWithTag("Player");
+        if (p != null)
+            player = p.transform;
+        else
+            Debug.LogError("EnemyMovement: no GameObject tagged 'Player'!");
+        
     }
 
     void Update()
     {
         if (player == null || stats == null) return;
 
-        float distance = Vector3.Distance(transform.position, player.position);
+        float dist = Vector3.Distance(transform.position, player.position);
 
-        if (!stats.isRanged)
+        // only chase if alwaysAlert OR within agroRange
+        bool shouldChase = stats.alwaysAlert || dist <= stats.agroRange;
+        if (!shouldChase) return;
+
+        // decide how far we should stay from player
+        float stopAt = stats.isRanged ? stats.attackRange : stats.stopDistance;
+
+        if (dist < stopAt)
         {
-            // melee tries to get close
-            if (distance > 1f) // not overlapping
-            {
-                MoveTowardPlayer();
-            }
+            // clamp so we never overlap the player
+            Vector3 dirAway = (transform.position - player.position).normalized;
+            transform.position = player.position + dirAway * stopAt;
+            transform.position = new Vector3(
+                transform.position.x,
+                transform.position.y,
+                transform.position.z
+            );
         }
         else
         {
-            // ranged stays back unless too far
-            if (distance > stats.attackRange)
-            {
-                MoveTowardPlayer();
-            }
-            // else hold position (ranged attacking from distance)
+            // move closer
+            Vector3 dir = (player.position - transform.position).normalized;
+            Vector3 move = dir * stats.moveSpeed * Time.deltaTime;
+            move.y = 0;  // no vertical drift
+            transform.position += move;
         }
-    }
 
-    void MoveTowardPlayer()
-    {
-        Vector3 direction = (player.position - transform.position).normalized;
-
-        // move forward
-        transform.position += direction * stats.moveSpeed * Time.deltaTime;
-
-        // rotate to face player
-        if (direction != Vector3.zero)
+        // rotate only on Y so we stay upright
+        Vector3 look = player.position - transform.position;
+        look.y = 0;
+        if (look.sqrMagnitude > 0.001f)
         {
-            Quaternion lookRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Euler(-90f, lookRotation.eulerAngles.y, 0f);
+            Quaternion goal = Quaternion.LookRotation(look);
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation, goal, Time.deltaTime * 5f
+            );
         }
     }
-
 }
