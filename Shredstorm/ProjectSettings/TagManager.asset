@@ -7,6 +7,8 @@ TagManager:
   - Enemy
   - Experience
   - PlayerAttack
+  - Drummer
+  - Singer
   layers:
   - Default
   - TransparentFX

@@ -10,6 +10,8 @@ public class PlayerAttack : MonoBehaviour
     private GameObject attackArea;
     [SerializeField]
     private float attackLength;
+    [SerializeField]
+    private int mouseButton;
     private float attackTimer = 0;
     private float delayTimer = 0;
     // Start is called before the first frame update
@@ -35,7 +37,7 @@ public class PlayerAttack : MonoBehaviour
         {
             delayTimer -= Time.deltaTime;
         }
-        if (Input.GetMouseButton(0) && (attackTimer <= 0 && delayTimer <= 0)){
+        if (Input.GetMouseButton(mouseButton) && (attackTimer <= 0 && delayTimer <= 0)){
             attackArea.SetActive(true);
             attackTimer = attackLength;
         }
