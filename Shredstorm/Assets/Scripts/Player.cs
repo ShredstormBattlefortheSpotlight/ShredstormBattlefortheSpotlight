@@ -26,6 +26,12 @@ public class Player : MonoBehaviour
     private int level = 1;
     [SerializeField]
     private int experienceRequired = 100;
+    [SerializeField]
+    private GameObject drummerAbility = null;
+    [SerializeField]
+    private GameObject singerAbility;
+    [SerializeField]
+    private Animation walkAnimation;
     // Start is called before the first frame update
     void Start()
     {
@@ -42,11 +48,27 @@ public class Player : MonoBehaviour
             transform.forward = movement;
             transform.rotation = Quaternion.Slerp (transform.rotation, Quaternion.LookRotation(transform.forward), Time.deltaTime * 40f);
             transform.rotation = Quaternion.Euler(-90, transform.eulerAngles.y, transform.eulerAngles.z);
+            walkAnimation.Play("root|PlayerRun");
 
         }
 
         movement.y = gravity;
         controller.Move(speed * Time.deltaTime * movement);
+
+        Vector3 fwd = transform.TransformDirection(Vector3.forward);
+
+        if (Physics.Raycast(transform.position, fwd, 20))
+        {
+            print("There is something in front of the object!");
+            Debug.DrawRay(transform.position, transform.forward, Color.green);
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Drummer")){
+            Debug.Log("Contact with drummer");
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -55,6 +77,17 @@ public class Player : MonoBehaviour
         {
             experience += experiencePerObject;
             CheckLevelUp();
+        }
+        if (other.gameObject.CompareTag("Drummer"))
+        {
+            Debug.Log("Contact with drummer");
+            Destroy(other.gameObject);
+        }
+        if (other.gameObject.CompareTag("Singer"))
+        {
+            Debug.Log("Contact with singer");
+            singerAbility.SetActive(true);
+            Destroy(other.gameObject);
         }
     }
 

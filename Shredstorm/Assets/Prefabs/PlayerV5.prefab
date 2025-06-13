@@ -225,7 +225,7 @@ PrefabInstance:
       addedObject: {fileID: 4418447229792832235}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f4f19f3b996324146b94b328a4cf4f62, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5724614741871629280}
+      addedObject: {fileID: 6843552612181002144}
   m_SourcePrefab: {fileID: 100100000, guid: f4f19f3b996324146b94b328a4cf4f62, type: 3}
 --- !u!1 &5928913177288537507 stripped
 GameObject:
@@ -253,6 +253,8 @@ MonoBehaviour:
   gravity: -2.5
   experiencePerObject: 100
   levelUpUI: {fileID: 0}
+  level: 1
+  experienceRequired: 100
 --- !u!143 &4418447229792832235
 CharacterController:
   m_ObjectHideFlags: 0
@@ -279,7 +281,7 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
---- !u!136 &5724614741871629280
+--- !u!136 &6843552612181002144
 CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
