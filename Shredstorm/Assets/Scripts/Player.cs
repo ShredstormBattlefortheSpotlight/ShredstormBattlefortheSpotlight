@@ -31,9 +31,12 @@ public class Player : MonoBehaviour, IDamageable
     [SerializeField]
     private GameObject singerAbility;
     [SerializeField]
-    private Animation walkAnimation;
+    private Animation animations;
+    [SerializeField]
+    private GameObject guitar;
     [SerializeField]
     private GameObject spawnPoint;
+    private string state = "idle";
     // Start is called before the first frame update
     void Start()
     {
@@ -46,25 +49,37 @@ public class Player : MonoBehaviour, IDamageable
     {
         Vector3 movement = new(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
         movement = Vector3.ClampMagnitude(movement, 1f);
-        if (movement != Vector3.zero)
+        if (movement != Vector3.zero && state != "attack")
         {
             transform.forward = movement;
             transform.rotation = Quaternion.Slerp (transform.rotation, Quaternion.LookRotation(transform.forward), Time.deltaTime * 40f);
-            transform.rotation = Quaternion.Euler(-90, transform.eulerAngles.y, transform.eulerAngles.z);
-            //walkAnimation.Play("root|PlayerRun");
+            state = "run";
+            //transform.rotation = Quaternion.Euler(-90, transform.eulerAngles.y, transform.eulerAngles.z);
+            animations.Play("rig|PlayerRun");
+            guitar.SetActive(false);
 
+        }
+        else if (state != "attack")
+        {
+            state = "idle";
+        }
+        if (state != "run")
+        {
+            guitar.SetActive(true);
+        }
+        if (state == "idle")
+        {
+            animations.Play("rig|PlayerIdle");
         }
 
         movement.y = gravity;
-        controller.Move(speed * Time.deltaTime * movement);
+        if (state != "attack")
+        {
+            controller.Move(speed * Time.deltaTime * movement);
+        }
 
         Vector3 fwd = transform.TransformDirection(Vector3.forward);
 
-        if (Physics.Raycast(transform.position, fwd, 20))
-        {
-            print("There is something in front of the object!");
-            Debug.DrawRay(transform.position, transform.forward, Color.green);
-        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -140,5 +155,24 @@ public class Player : MonoBehaviour, IDamageable
 
         // flash gray
         
+    }
+    public void SetState(int newState)
+    {
+        switch (newState)
+        {
+            case 1:
+                state = "idle";
+                break;
+            case 2:
+                state = "run";
+                break;
+            case 3:
+                state = "attack";
+                break;
+            default:
+                Debug.Log("Invalid player state, setting to idle");
+                state = "idle";
+                break;
+        }
     }
 }
