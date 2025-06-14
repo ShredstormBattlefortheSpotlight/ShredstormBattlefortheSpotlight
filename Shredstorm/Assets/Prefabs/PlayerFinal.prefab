@@ -50,9 +50,6 @@ MonoBehaviour:
   attackLength: 2.5
   attackPower: 0
   mouseButton: 2
-  player: {fileID: 5971739184774386569}
-  anims: {fileID: 4012707394909903156}
-  attackSwitch: 1
 --- !u!1 &973526057942257570
 GameObject:
   m_ObjectHideFlags: 0
@@ -357,9 +354,6 @@ MonoBehaviour:
   attackLength: 0
   attackPower: 0
   mouseButton: 0
-  player: {fileID: 0}
-  anims: {fileID: 0}
-  attackSwitch: 0
 --- !u!1 &7927244471266898666
 GameObject:
   m_ObjectHideFlags: 0
@@ -410,9 +404,6 @@ MonoBehaviour:
   attackLength: 1.5
   attackPower: 0
   mouseButton: 0
-  player: {fileID: 5971739184774386569}
-  anims: {fileID: 4012707394909903156}
-  attackSwitch: 0
 --- !u!1 &8633527641730213372
 GameObject:
   m_ObjectHideFlags: 0
@@ -752,7 +743,7 @@ MonoBehaviour:
   currentHealth: 0
   damage: 1
   experience: 0
-  speed: 4
+  speed: 10
   controller: {fileID: 6202076766334769356}
   gravity: -4
   experiencePerObject: 0
