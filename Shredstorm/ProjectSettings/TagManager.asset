@@ -9,6 +9,7 @@ TagManager:
   - PlayerAttack
   - Drummer
   - Singer
+  - PlayerSpawn
   layers:
   - Default
   - TransparentFX

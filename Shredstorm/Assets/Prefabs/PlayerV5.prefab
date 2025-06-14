@@ -685,6 +685,7 @@ MonoBehaviour:
   drummerAbility: {fileID: 0}
   singerAbility: {fileID: 3357835020442412292}
   walkAnimation: {fileID: 4637905463964892119}
+  spawnPoint: {fileID: 0}
 --- !u!143 &4418447229792832235
 CharacterController:
   m_ObjectHideFlags: 0

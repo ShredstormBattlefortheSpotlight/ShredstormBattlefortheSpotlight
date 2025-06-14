@@ -34,6 +34,13 @@ public class Player : MonoBehaviour, IDamageable
     private Animation walkAnimation;
     [SerializeField]
     private GameObject spawnPoint;
+    
+    public float CurrentHealth => currentHealth;
+    public float MaximumHealth => maximumHealth;
+    public float Damage => damage;
+    public int Experience => experience;
+    public int ExperienceRequired => experienceRequired;
+
     // Start is called before the first frame update
     void Start()
     {

@@ -2,120 +2,107 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[System.Serializable]
-public struct Wave
-{
-    public string    name;           // for easy debug in waves list
-    public GameObject enemyPrefab;  
-    public int       count;          // how many to spawn this wave
-    public float     spawnInterval;  // seconds between each spawn
-}
-
 /*
  * EnemySpawner.cs
- *  – runs through a list of Waves
- *  – for each wave, spawns `count` enemies at `spawnInterval`
+ *  – spawns enemies at random intervals near the player
+ *  – optionally scales enemy difficulty over time
+ *  – spawns boss after timer runs out
  *  – can spawn at fixed spawnPoints OR randomly around the Player
  *  – automatically parents spawned enemies under this GameObject
  */
 
 public class EnemySpawner : MonoBehaviour
 {
-    [Header("Wave Configuration")]
-    public List<Wave> waves;
-    public bool       prePool          = true;   // instantiate all at Start (disabled) then reuse
     [Header("Spawn Options")]
-    public bool       useRandomRadius  = true;   // if true, ignore spawnPoints and pick random around player
-    public float      minSpawnRadius   = 20f;    // if random, minimum distance from player
-    public float      maxSpawnRadius   = 50f;    // if random, maximum distance from player
-    [Header("Fixed Spawn Points")]
-    public Transform[] spawnPoints;              // optional: drag empty Transforms here
+    public GameObject[] enemyPrefabs;           // array of enemy types to randomly spawn
+    public float spawnInterval = 5f;            // how often to spawn
+    public float spawnVariance = 1f;            // random +/- variance per spawn
 
-    private Dictionary<GameObject, Queue<GameObject>> pools 
-        = new Dictionary<GameObject, Queue<GameObject>>();
-    private Transform player;                     // cache player transform
+    public bool useRandomRadius = true;         // if true, ignore spawnPoints and pick random around player
+    public float minSpawnRadius = 20f;          // minimum distance from player
+    public float maxSpawnRadius = 50f;          // maximum distance from player
+
+    [Header("Fixed Spawn Points")]
+    public Transform[] spawnPoints;             // optional: drag empty Transforms here
+
+    [Header("Scaling Settings")]
+    public float difficultyInterval = 15f;      // how often to scale enemies (in seconds)
+    public float scaleMultiplier = 1.1f;        // how much stronger per scale tick
+
+    [Header("Boss Settings")]
+    public GameObject bossPrefab;               // assign boss prefab
+    public float gameDuration = 300f;           // seconds until boss spawns
+
+    private float elapsedTime = 0f;             // time since start
+    private float nextDifficultyTime = 0f;      // tracks scaling interval
+    private bool bossSpawned = false;
+
+    private float currentScale = 1f;            // current enemy scaling multiplier
+    private Transform player;
 
     void Start()
     {
-        // find the Player by tag
         var p = GameObject.FindGameObjectWithTag("Player");
         if (p != null) player = p.transform;
         else Debug.LogError("EnemySpawner: no GameObject tagged 'Player'!");
 
-        if (prePool)
-            PrePoolAllWaves();
-
-        StartCoroutine(RunAllWaves());
+        StartCoroutine(SpawnEnemiesOverTime());
     }
 
-    private void PrePoolAllWaves()
+    private IEnumerator SpawnEnemiesOverTime()
     {
-        foreach (var w in waves)
+        while (elapsedTime < gameDuration)
         {
-            if (w.enemyPrefab == null || w.count <= 0) continue;
-            var q = new Queue<GameObject>();
-            for (int i = 0; i < w.count; i++)
-            {
-                // parent to this spawner so hierarchy stays clean
-                var go = Instantiate(w.enemyPrefab, Vector3.zero, Quaternion.identity, transform);
-                go.SetActive(false);
-                q.Enqueue(go);
-            }
-            pools[w.enemyPrefab] = q;
-        }
-    }
+            elapsedTime += Time.deltaTime;
 
-    private IEnumerator RunAllWaves()
-    {
-        for (int i = 0; i < waves.Count; i++)
-        {
-            var wave = waves[i];
-            DebugManager.Log($"--- Starting wave {i+1}: {wave.name} ({wave.count} enemies) ---");
-
-            for (int j = 0; j < wave.count; j++)
+            // scale difficulty if time
+            if (elapsedTime >= nextDifficultyTime)
             {
-                SpawnOne(wave.enemyPrefab);
-                yield return new WaitForSeconds(wave.spawnInterval);
+                currentScale *= scaleMultiplier;
+                nextDifficultyTime += difficultyInterval;
+                Debug.Log($"[EnemySpawner] Difficulty scaled to {currentScale:F2}");
             }
 
-            // wait for all of this prefab’s active instances to be gone
-            yield return new WaitUntil(() =>
-            {
-                foreach (var es in FindObjectsOfType<EnemyStats>())
-                {
-                    if (es.gameObject.activeInHierarchy && es.gameObject.CompareTag(wave.enemyPrefab.tag))
-                        return false;
-                }
-                return true;
-            });
+            // spawn one enemy
+            GameObject prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
+            SpawnOne(prefab);
+
+            float nextDelay = spawnInterval + Random.Range(-spawnVariance, spawnVariance);
+            nextDelay = Mathf.Max(1f, nextDelay); // minimum delay
+            yield return new WaitForSeconds(nextDelay);
         }
 
-        DebugManager.Log("All waves complete!");
+        // Boss Spawn after timer ends
+        if (!bossSpawned && bossPrefab != null && player != null)
+        {
+            bossSpawned = true;
+
+            Vector3 bossSpawnPos = player.position + player.forward * 10f;
+
+            if (Physics.Raycast(bossSpawnPos + Vector3.up * 10f, Vector3.down, out RaycastHit hit, 30f))
+            {
+                bossSpawnPos.y = hit.point.y + 1.5f;
+            }
+
+            Instantiate(bossPrefab, bossSpawnPos, Quaternion.identity);
+            Debug.Log("Boss spawned!");
+        }
     }
 
     private void SpawnOne(GameObject prefab)
     {
-        GameObject go;
+        GameObject go = Instantiate(prefab, Vector3.zero, Quaternion.identity, transform);
 
-        // pop from pool if available
-        if (prePool && pools.TryGetValue(prefab, out var q) && q.Count > 0)
+        var stats = go.GetComponent<EnemyStats>();
+        if (stats != null)
         {
-            go = q.Dequeue();
-            go.SetActive(true);
-        }
-        else
-        {
-            // instantiate and parent under this spawner
-            go = Instantiate(prefab, Vector3.zero, Quaternion.identity, transform);
-            if (prePool)
-                pools[prefab].Enqueue(go);
+            stats.RandomizeStats();
+            stats.ScaleStats(currentScale); // apply difficulty scaling
         }
 
-        // choose spawn position
         Vector3 spawnPos;
         if (useRandomRadius && player != null)
         {
-            // pick a random direction on the XZ plane
             Vector2 circle = Random.insideUnitCircle.normalized;
             float radius = Random.Range(minSpawnRadius, maxSpawnRadius);
             Vector3 offset = new Vector3(circle.x, 0, circle.y) * radius;
@@ -123,31 +110,27 @@ public class EnemySpawner : MonoBehaviour
         }
         else if (spawnPoints != null && spawnPoints.Length > 0)
         {
-            // pick one of the fixed points
             var sp = spawnPoints[Random.Range(0, spawnPoints.Length)];
             spawnPos = sp.position;
         }
         else
         {
-            // fallback: spawn at spawner’s position
             spawnPos = transform.position;
         }
 
-        // apply position  (keep prefab’s own Y if needed)
-        go.transform.position = new Vector3(spawnPos.x, spawnPos.y, spawnPos.z);
+        if (Physics.Raycast(spawnPos + Vector3.up * 10f, Vector3.down, out RaycastHit hit, 30f))
+        {
+            float yOffset = 1.5f;
+            spawnPos.y = hit.point.y + yOffset;
+        }
+
+        go.transform.position = spawnPos;
         go.transform.rotation = Quaternion.identity;
     }
 
-    /// <summary>
-    /// Call this from EnemyHealth.Die() instead of Destroy to reuse in pool.
-    /// </summary>
+    // Call this from EnemyHealth.Die() instead of Destroy to reuse in pool.
     public void ReturnToPool(GameObject go)
     {
-        Debug.Log("Returning to Pool");
-        go.SetActive(false);
-        if (prePool && pools.TryGetValue(go, out var q))
-            q.Enqueue(go);
-        else
-            Destroy(go);
+        Destroy(go); // pooling not used yet
     }
 }

@@ -14,6 +14,9 @@ public class EnemyMovement : MonoBehaviour
     private Transform player;
     private float gravity;
 
+    // Store original speed so we can apply per-instance randomness only once
+    private bool randomizedSpeedApplied = false;
+
     void Start()
     {
         // find stats on this object or its children
@@ -28,12 +31,20 @@ public class EnemyMovement : MonoBehaviour
             player = p.transform;
         else
             Debug.LogError("EnemyMovement: no GameObject tagged 'Player'!");
-        
     }
 
     void Update()
     {
         if (player == null || stats == null) return;
+
+        // NEW: Apply random speed variance once at runtime
+        if (!randomizedSpeedApplied)
+        {
+            float min = stats.moveSpeed * 1f;
+            float max = stats.moveSpeed * 2f;
+            stats.moveSpeed = Random.Range(min, max);
+            randomizedSpeedApplied = true;
+        }
 
         float dist = Vector3.Distance(transform.position, player.position);
 
