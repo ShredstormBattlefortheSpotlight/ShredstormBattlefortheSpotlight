@@ -217,7 +217,7 @@ MonoBehaviour:
   knockbackResistance: 0
   xpDrop: 10
   xpRange: {x: 5, y: 25}
-  xpPickupPrefab: {fileID: 0}
+  xpPickupPrefab: {fileID: 8627876028884246333, guid: 105569708f88e46ada49fb42dc9b88e4, type: 3}
   hitEffect: {fileID: 0}
   hitSound: {fileID: 0}
   deathEffect: {fileID: 0}
