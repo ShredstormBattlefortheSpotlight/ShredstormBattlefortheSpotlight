@@ -11,6 +11,8 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private float attackLength;
     [SerializeField]
+    private int attackPower;
+    [SerializeField]
     private int mouseButton;
     private float attackTimer = 0;
     private float delayTimer = 0;
@@ -42,4 +44,10 @@ public class PlayerAttack : MonoBehaviour
             attackTimer = attackLength;
         }
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+       
+    }
+    
 }

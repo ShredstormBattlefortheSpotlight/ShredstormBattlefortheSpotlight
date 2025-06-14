@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IDamageable
 {
     [SerializeField]
     private float maximumHealth;
@@ -32,10 +32,13 @@ public class Player : MonoBehaviour
     private GameObject singerAbility;
     [SerializeField]
     private Animation walkAnimation;
+    [SerializeField]
+    private GameObject spawnPoint;
     // Start is called before the first frame update
     void Start()
     {
         currentHealth = maximumHealth;
+        transform.position = spawnPoint.transform.position;
     }
 
     // Update is called once per frame
@@ -48,7 +51,7 @@ public class Player : MonoBehaviour
             transform.forward = movement;
             transform.rotation = Quaternion.Slerp (transform.rotation, Quaternion.LookRotation(transform.forward), Time.deltaTime * 40f);
             transform.rotation = Quaternion.Euler(-90, transform.eulerAngles.y, transform.eulerAngles.z);
-            walkAnimation.Play("root|PlayerRun");
+            //walkAnimation.Play("root|PlayerRun");
 
         }
 
@@ -129,13 +132,13 @@ public class Player : MonoBehaviour
     {
         damage += upgrade;
     }
-    public void TakeDamage(float damage)
+    public void TakeDamage(int amount, Vector3 knockDir, float knockForce)
     {
-        currentHealth -= damage;
-        if (currentHealth <= 0)
-        {
-            currentHealth = 0;
-            //gameover logic goes here
-        }
+        currentHealth -= amount;
+
+        // apply physics knockback
+
+        // flash gray
+        
     }
 }

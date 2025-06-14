@@ -29,20 +29,23 @@ public class EnemyAttack : MonoBehaviour
         if (player == null || stats == null || isAttacking) return;
 
         float dist = Vector3.Distance(transform.position, player.position);
+        
 
         // decide attack range: melee stops at stopDistance, ranged uses attackRange
-        float range = stats.isRanged ? stats.attackRange : stats.stopDistance;
+        //float range = stats.isRanged ? stats.attackRange : stats.stopDistance;
+        float range = stats.attackRange;
         float cdRemaining = (lastAttackTime + stats.attackCooldown) - Time.time;
+
 
         // DebugManager.Log(
         //     $"[{stats.enemyName}] dist={dist:F1}, range={range}, cdRem={Mathf.Max(cdRemaining, 0f):F1}"
         // );
-        
+
         // close enough + cooldown ready?
+        //Debug.Log("Player in range? " + (dist <= range));
         if (dist <= range && Time.time >= lastAttackTime + stats.attackCooldown)
         {
             lastAttackTime = Time.time;
-            DebugManager.Log($"[{stats.enemyName}] → starting windup");  
             StartCoroutine(PerformAttack());
         }
 

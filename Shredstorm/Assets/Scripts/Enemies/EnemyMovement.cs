@@ -12,6 +12,7 @@ public class EnemyMovement : MonoBehaviour
 {
     private EnemyStats stats;
     private Transform player;
+    private float gravity;
 
     void Start()
     {
@@ -59,7 +60,7 @@ public class EnemyMovement : MonoBehaviour
             // move closer
             Vector3 dir = (player.position - transform.position).normalized;
             Vector3 move = dir * stats.moveSpeed * Time.deltaTime;
-            move.y = 0;  // no vertical drift
+            move.y = gravity;  // no vertical drift
             transform.position += move;
         }
 

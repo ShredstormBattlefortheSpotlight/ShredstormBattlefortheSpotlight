@@ -143,6 +143,7 @@ public class EnemySpawner : MonoBehaviour
     /// </summary>
     public void ReturnToPool(GameObject go)
     {
+        Debug.Log("Returning to Pool");
         go.SetActive(false);
         if (prePool && pools.TryGetValue(go, out var q))
             q.Enqueue(go);

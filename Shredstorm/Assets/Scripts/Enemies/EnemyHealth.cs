@@ -9,6 +9,7 @@ using UnityEngine;
  */
 public class EnemyHealth : MonoBehaviour, IDamageable
 {
+    [SerializeField]
     private int currentHealth;
     private EnemyStats stats;
 
