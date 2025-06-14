@@ -34,7 +34,7 @@ public class EnemyStats : MonoBehaviour
 
     [Header("optional vfx/sfx")]
     public ParticleSystem hitEffect;              // plays on takedamage()
-    //public AudioClip hitSound;                    // plays on takedamage()
+    public AudioClip hitSound;                    // plays on takedamage()
     public AudioClip  misfit2;
     public ParticleSystem deathEffect;            // plays on die()
     public AudioClip deathSound;                  // plays on die()
