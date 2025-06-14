@@ -14,14 +14,8 @@ public class PlayerAttack : MonoBehaviour
     private int attackPower;
     [SerializeField]
     private int mouseButton;
-    [SerializeField]
-    private Player player;
-    [SerializeField]
-    private Animation anims;
     private float attackTimer = 0;
     private float delayTimer = 0;
-    [SerializeField]
-    private int attackSwitch;
     // Start is called before the first frame update
     void Start()
     {
@@ -39,7 +33,6 @@ public class PlayerAttack : MonoBehaviour
             {
                 delayTimer = attackDelay;
                 attackArea.SetActive(false);
-                player.SetState(1);
             }
         }
         else if (delayTimer > 0)
@@ -48,20 +41,8 @@ public class PlayerAttack : MonoBehaviour
         }
         if (Input.GetMouseButton(mouseButton) && (attackTimer <= 0 && delayTimer <= 0)){
             attackArea.SetActive(true);
-            switch (attackSwitch)
-            {
-                case 0:
-                    anims.Play("rig|PlayerAttack");
-                    break;
-                case 1:
-                    anims.Play("rig|PlayerAttack2");
-                    break;
-                default:
-                    Debug.Log("attackswitch invalid value");
-                    break;
-            }
             attackTimer = attackLength;
-            player.SetState(3);
+            SoundManager.PlaySound(AudioClip: Misfit);
         }
     }
 

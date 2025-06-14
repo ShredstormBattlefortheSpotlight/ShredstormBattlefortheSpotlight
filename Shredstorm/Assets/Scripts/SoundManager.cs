@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class SoundManager : MonoBehaviour
@@ -37,4 +38,8 @@ public class SoundManager : MonoBehaviour
         Instance.audioSource.PlayOneShot(Instance.soundList[(int)sound], volume);
     }
 
+    internal static void PlaySound(object AudioClip)
+    {
+        throw new NotImplementedException();
+    }
 }
