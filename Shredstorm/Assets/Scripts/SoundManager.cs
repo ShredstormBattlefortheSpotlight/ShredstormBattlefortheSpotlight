@@ -9,7 +9,8 @@ public class SoundManager : MonoBehaviour
         Star,
         Misfit,
         Announcer,
-        Encounter
+        Encounter,
+        Instrument
     }
 
     private AudioSource audioSource;
