@@ -47,6 +47,10 @@ public class Player : MonoBehaviour, IDamageable
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
         Vector3 movement = new(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
         movement = Vector3.ClampMagnitude(movement, 1f);
         if (movement != Vector3.zero && state != "attack")
@@ -79,6 +83,7 @@ public class Player : MonoBehaviour, IDamageable
         }
 
         Vector3 fwd = transform.TransformDirection(Vector3.forward);
+
 
     }
 
