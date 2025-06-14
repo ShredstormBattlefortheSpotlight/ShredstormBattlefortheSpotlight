@@ -42,7 +42,7 @@ public class PlayerAttack : MonoBehaviour
         if (Input.GetMouseButton(mouseButton) && (attackTimer <= 0 && delayTimer <= 0)){
             attackArea.SetActive(true);
             attackTimer = attackLength;
-            SoundManager.PlaySound(AudioClip: Misfit);
+            //SoundManager.PlaySound(AudioClip: Misfit);
         }
     }
 
