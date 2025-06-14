@@ -1,3 +1,6 @@
+using JetBrains.Annotations;
+using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class EnemyStats : MonoBehaviour
@@ -31,9 +34,12 @@ public class EnemyStats : MonoBehaviour
 
     [Header("optional vfx/sfx")]
     public ParticleSystem hitEffect;              // plays on takedamage()
-    public AudioClip hitSound;                    // plays on takedamage()
+    //public AudioClip hitSound;                    // plays on takedamage()
+    public AudioClip  misfit2;
     public ParticleSystem deathEffect;            // plays on die()
     public AudioClip deathSound;                  // plays on die()
+
+    
 
     [Header("animation")]
     public Animator animator;                     // drag your Animator here
@@ -44,4 +50,11 @@ public class EnemyStats : MonoBehaviour
 
     [Header("ui")]
     public GameObject healthBarPrefab;            // optional healthbar over head
+    
 }
+
+
+
+
+
+ 

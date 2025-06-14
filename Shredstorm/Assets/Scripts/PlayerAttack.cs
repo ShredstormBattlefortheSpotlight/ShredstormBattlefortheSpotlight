@@ -16,6 +16,8 @@ public class PlayerAttack : MonoBehaviour
     private int mouseButton;
     private float attackTimer = 0;
     private float delayTimer = 0;
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -42,7 +44,6 @@ public class PlayerAttack : MonoBehaviour
         if (Input.GetMouseButton(mouseButton) && (attackTimer <= 0 && delayTimer <= 0)){
             attackArea.SetActive(true);
             attackTimer = attackLength;
-            //SoundManager.PlaySound(AudioClip: Misfit);
         }
     }
 
